@@ -58,7 +58,8 @@ void __init_libc(char **envp, char *pn)
 
 static void libc_start_init(void)
 {
-	_init();
+	_init();  // 链接器生成的init代码节
+	// 这个初始化代码数组是定义在ld.so中，在哪里添加更多的init代码？
 	uintptr_t a = (uintptr_t)&__init_array_start;
 	for (; a<(uintptr_t)&__init_array_end; a+=sizeof(void(*)()))
 		(*(void (**)(void))a)();
@@ -77,7 +78,7 @@ int __libc_start_main(int (*main)(int,char **,char **), int argc, char **argv,
 	/* External linkage, and explicit noinline attribute if available,
 	 * are used to prevent the stack frame used during init from
 	 * persisting for the entire process lifetime. */
-	__init_libc(envp, argv[0]);
+	__init_libc(envp, argv[0]);  // libc初始化，在程序启动的时候
 
 	/* Barrier against hoisting application code or anything using ssp
 	 * or thread pointer prior to its initialization above. */
@@ -89,9 +90,10 @@ int __libc_start_main(int (*main)(int,char **,char **), int argc, char **argv,
 static int libc_start_main_stage2(int (*main)(int,char **,char **), int argc, char **argv)
 {
 	char **envp = argv+argc+1;
-	__libc_start_init();
+	__libc_start_init();  // 初始化全局的init节，里面有C++的构造函数或者显示要求初始化的代码段
 
 	/* Pass control to the application */
+	// 这里调用用户编写的main函数入口
 	exit(main(argc, argv, envp));
 	return 0;
 }

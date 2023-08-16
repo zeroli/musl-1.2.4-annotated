@@ -141,7 +141,7 @@ static int ldso_fail;
 static int noload;
 static int shutting_down;
 static jmp_buf *rtld_fail;
-static pthread_rwlock_t lock;
+static pthread_rwlock_t lock;  // 全局的读写锁，控制所有函数的访问
 static struct debug debug;
 static struct tls_module *tls_tail;
 static size_t tls_cnt, tls_offset, tls_align = MIN_TLS_ALIGN;
@@ -1326,7 +1326,7 @@ static void extend_bfs_deps(struct dso *p)
 		struct dso *dep = p->deps[i];
 		for (j=cnt=0; j<dep->ndeps_direct; j++)
 			if (!dep->deps[j]->mark) cnt++;
-		tmp = no_realloc ? 
+		tmp = no_realloc ?
 			malloc(sizeof(*tmp) * (ndeps_all+cnt+1)) :
 			realloc(p->deps, sizeof(*tmp) * (ndeps_all+cnt+1));
 		if (!tmp) {
@@ -1587,7 +1587,7 @@ static void do_init_fini(struct dso **queue)
 		if (p->ctor_visitor || p->constructed)
 			continue;
 		p->ctor_visitor = self;
-		
+
 		decode_vec(p->dynv, dyn, DYN_CNT);
 		if (dyn[0] & ((1<<DT_FINI) | (1<<DT_FINI_ARRAY))) {
 			p->fini_next = fini_head;
@@ -1698,7 +1698,7 @@ static void install_new_tls(void)
  * following stage 2 and stage 3 functions via primitive symbolic lookup
  * since it does not have access to their addresses to begin with. */
 
-/* Stage 2 of the dynamic linker is called after relative relocations 
+/* Stage 2 of the dynamic linker is called after relative relocations
  * have been processed. It can make function calls to static functions
  * and access string literals and static data, but cannot use extern
  * symbols. Its job is to perform symbolic relocations on the dynamic
@@ -2106,10 +2106,11 @@ void *dlopen(const char *file, int mode)
 	jmp_buf jb;
 	struct dso **volatile ctor_queue = 0;
 
+	// file is null, then it's current process itself, and it's `head`
 	if (!file) return head;
 
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
-	pthread_rwlock_wrlock(&lock);
+	pthread_rwlock_wrlock(&lock); // 全局的读写锁
 	__inhibit_ptc();
 
 	debug.state = RT_ADD;
@@ -2356,9 +2357,11 @@ int dladdr(const void *addr_arg, Dl_info *info)
 	return 1;
 }
 
+// 这个函数才是真正的dlsym的实现
 hidden void *__dlsym(void *restrict p, const char *restrict s, void *restrict ra)
 {
 	void *res;
+	// 全局的读写锁，锁住读锁
 	pthread_rwlock_rdlock(&lock);
 	res = do_dlsym(p, s, ra);
 	pthread_rwlock_unlock(&lock);
