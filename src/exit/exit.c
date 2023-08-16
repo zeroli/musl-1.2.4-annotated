@@ -22,6 +22,7 @@ static void libc_exit_fini(void)
 	_fini();
 }
 
+// 没有strong symbol的话，就用这个默认实现`libc_exit_fini`
 weak_alias(libc_exit_fini, __libc_exit_fini);
 
 _Noreturn void exit(int code)

@@ -65,6 +65,8 @@ static void libc_start_init(void)
 		(*(void (**)(void))a)();
 }
 
+// dynlink.c也定义了一个__libc_start_init函数，全局的，strong symbol
+// 会覆盖这个weak symbol定义
 weak_alias(libc_start_init, __libc_start_init);
 
 typedef int lsm2_fn(int (*)(int,char **,char **), int, char **);

@@ -253,12 +253,12 @@ static uint32_t gnu_hash(const char *s0)
 static Sym *sysv_lookup(const char *s, uint32_t h, struct dso *dso)
 {
 	size_t i;
-	Sym *syms = dso->syms;
+	Sym *syms = dso->syms;  // symbol数组
 	Elf_Symndx *hashtab = dso->hashtab;
-	char *strings = dso->strings;
+	char *strings = dso->strings;  // 所有符号的字符串buffer，连接起来的！！
 	for (i=hashtab[2+h%hashtab[0]]; i; i=hashtab[2+hashtab[0]+i]) {
 		if ((!dso->versym || dso->versym[i] >= 0)
-		    && (!strcmp(s, strings+syms[i].st_name)))
+		    && (!strcmp(s, strings+syms[i].st_name)))  // 比较字符串！！
 			return syms+i;
 	}
 	return 0;
@@ -1464,6 +1464,7 @@ static void kernel_mapped_dso(struct dso *p)
 	p->kernel_mapped = 1;
 }
 
+// 全局strong symbol，override libc默认简单实现
 void __libc_exit_fini()
 {
 	struct dso *p;
@@ -1486,6 +1487,7 @@ void __libc_exit_fini()
 			size_t n = dyn[DT_FINI_ARRAYSZ]/sizeof(size_t);
 			size_t *fn = (size_t *)laddr(p, dyn[DT_FINI_ARRAY])+n;
 			while (n--) ((void (*)(void))*--fn)();
+			// 调用用户定义的C++的全局对象析构函数
 		}
 #ifndef NO_LEGACY_INITFINI
 		if ((dyn[0] & (1<<DT_FINI)) && dyn[DT_FINI])
@@ -1604,6 +1606,7 @@ static void do_init_fini(struct dso **queue)
 			size_t n = dyn[DT_INIT_ARRAYSZ]/sizeof(size_t);
 			size_t *fn = laddr(p, dyn[DT_INIT_ARRAY]);
 			while (n--) ((void (*)(void))*fn++)();
+			// 这里调用C++全局对象构造函数代码段
 		}
 
 		pthread_mutex_lock(&init_fini_lock);
@@ -1614,6 +1617,7 @@ static void do_init_fini(struct dso **queue)
 	pthread_mutex_unlock(&init_fini_lock);
 }
 
+// 全局的符号，strong symbol
 void __libc_start_init(void)
 {
 	do_init_fini(main_ctor_queue);
@@ -2224,6 +2228,7 @@ end:
 	return p;
 }
 
+// 如何判断invalid handle呢？线性遍历链表！
 hidden int __dl_invalid_handle(void *h)
 {
 	struct dso *p;
@@ -2287,6 +2292,7 @@ static void *do_dlsym(struct dso *p, const char *s, void *ra)
 		return __tls_get_addr((tls_mod_off_t []){def.dso->tls_id, def.sym->st_value-DTP_OFFSET});
 	if (DL_FDPIC && (def.sym->st_info&0xf) == STT_FUNC)
 		return def.dso->funcdescs + (def.sym - def.dso->syms);
+	// 返回symbol对应的代码段或数据段内存地址
 	return laddr(def.dso, def.sym->st_value);
 }
 
