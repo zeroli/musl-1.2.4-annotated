@@ -17,3 +17,4 @@ START ": \n"
 // _DYNAMIC定义在哪里了？
 // _start_c需要唯一的long*参数p，p[0]就是argc，从p[1]开始就是argv字符串数组
 // 字符串数组就是指针的数组，数组最后一元素为nullptr
+// linux kernel在执行exec函数时，会将argc/argv/env放在程序stack的顶层，也就是rsp指向的地方

@@ -194,11 +194,13 @@ extern hidden volatile int __abort_lock[1];
 extern hidden unsigned __default_stacksize;
 extern hidden unsigned __default_guardsize;
 
-#define DEFAULT_STACK_SIZE 131072
-#define DEFAULT_GUARD_SIZE 8192
+#define DEFAULT_STACK_SIZE 131072  // 128K (too small)
+#define DEFAULT_GUARD_SIZE 8192  // 8K
 
-#define DEFAULT_STACK_MAX (8<<20)
-#define DEFAULT_GUARD_MAX (1<<20)
+// 即使用户可以通过API修改某一个线程的stack size
+// 也不能超过这个值8M
+#define DEFAULT_STACK_MAX (8<<20)  // 8M
+#define DEFAULT_GUARD_MAX (1<<20)  // 1M
 
 #define __ATTRP_C11_THREAD ((void*)(uintptr_t)-1)
 

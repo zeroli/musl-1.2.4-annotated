@@ -17,7 +17,7 @@ int pthread_setattr_default_np(const pthread_attr_t *attrp)
 	unsigned stack = MIN(attrp->_a_stacksize, DEFAULT_STACK_MAX);
 	unsigned guard = MIN(attrp->_a_guardsize, DEFAULT_GUARD_MAX);
 
-	__inhibit_ptc();
+	__inhibit_ptc(); // 获取写锁
 	__default_stacksize = MAX(__default_stacksize, stack);
 	__default_guardsize = MAX(__default_guardsize, guard);
 	__release_ptc();
