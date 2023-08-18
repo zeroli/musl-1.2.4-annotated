@@ -76,6 +76,7 @@ enum {
 
 #define __SU (sizeof(size_t)/sizeof(int))
 
+// pthread_attr_t结构体的成员访问
 #define _a_stacksize __u.__s[0]
 #define _a_guardsize __u.__s[1]
 #define _a_stackaddr __u.__s[2]
@@ -83,12 +84,14 @@ enum {
 #define _a_sched __u.__i[3*__SU+1]
 #define _a_policy __u.__i[3*__SU+2]
 #define _a_prio __u.__i[3*__SU+3]
+// mutex结构体成员访问
 #define _m_type __u.__i[0]
 #define _m_lock __u.__vi[1]
 #define _m_waiters __u.__vi[2]
 #define _m_prev __u.__p[3]
 #define _m_next __u.__p[4]
 #define _m_count __u.__i[5]
+// cond结构体成员访问
 #define _c_shared __u.__p[0]
 #define _c_seq __u.__vi[2]
 #define _c_waiters __u.__vi[3]
@@ -96,9 +99,11 @@ enum {
 #define _c_lock __u.__vi[8]
 #define _c_head __u.__p[1]
 #define _c_tail __u.__p[5]
+// rw lock成员访问
 #define _rw_lock __u.__vi[0]
 #define _rw_waiters __u.__vi[1]
 #define _rw_shared __u.__i[2]
+// barrier成员访问
 #define _b_lock __u.__vi[0]
 #define _b_waiters __u.__vi[1]
 #define _b_limit __u.__i[2]

@@ -4,7 +4,7 @@
 static void *__pthread_getspecific(pthread_key_t k)
 {
 	struct pthread *self = __pthread_self();
-	return self->tsd[k];
+	return self->tsd[k];  // thread storage就是简单的一个数组，key就是数组索引
 }
 
 weak_alias(__pthread_getspecific, pthread_getspecific);

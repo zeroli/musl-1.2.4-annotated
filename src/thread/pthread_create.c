@@ -10,6 +10,11 @@
 static void dummy_0()
 {
 }
+// 提供一些函数的默认空实现，以便下面代码可以引用调用它们，
+// 从而编译链接通过。
+// 然后在其它文件，或者其它模块中，实现一个强链接符号的函数
+// 链接后或者动态装载后，就会采用那个强链接符号的函数实现
+// 从而达到模块解耦的目的
 weak_alias(dummy_0, __acquire_ptc);
 weak_alias(dummy_0, __release_ptc);
 weak_alias(dummy_0, __pthread_tsd_run_dtors);
@@ -290,6 +295,7 @@ int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict att
 			+ libc.tls_size +  __pthread_tsd_size);
 	}
 
+	// 看上去，这里是对每个线程创建一片内存空间用来存储tls data？
 	if (!tsd) {
 		if (guard) {
 			map = __mmap(0, size, PROT_NONE, MAP_PRIVATE|MAP_ANON, -1, 0);

@@ -44,8 +44,10 @@ int __pthread_mutex_unlock(pthread_mutex_t *m)
 		self->robust_list.pending = 0;
 		__vm_unlock();
 	}
+	// 有等待者，唤醒它们
+	// TODO: 啥时候cont < 0???
 	if (waiters || cont<0)
-		__wake(&m->_m_lock, 1, priv);
+		__wake(&m->_m_lock, 1, priv);  // 唤醒1个waiter线程(第2个参数)，调用FUTEX_WAKEUP
 	return 0;
 }
 

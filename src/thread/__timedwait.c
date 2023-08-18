@@ -49,6 +49,7 @@ int __timedwait_cp(volatile int *addr, int val,
 		top = &to;
 	}
 
+	// 等待期间addr处的值不等于 val了，则返回
 	r = -__futex4_cp(addr, FUTEX_WAIT|priv, val, top);
 	if (r != EINTR && r != ETIMEDOUT && r != ECANCELED) r = 0;
 	/* Mitigate bug in old kernels wrongly reporting EINTR for non-

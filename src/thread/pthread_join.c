@@ -13,6 +13,7 @@ static int __pthread_timedjoin_np(pthread_t t, void **res, const struct timespec
 	__pthread_testcancel();
 	__pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &cs);
 	if (cs == PTHREAD_CANCEL_ENABLE) __pthread_setcancelstate(cs, 0);
+	//  所谓join，就是等待线程是否exit时，将一个特别的标志位修改了
 	while ((state = t->detach_state) && r != ETIMEDOUT && r != EINVAL) {
 		if (state >= DT_DETACHED) a_crash();
 		r = __timedwait_cp(&t->detach_state, state, CLOCK_REALTIME, at, 1);
@@ -22,7 +23,7 @@ static int __pthread_timedjoin_np(pthread_t t, void **res, const struct timespec
 	__tl_sync(t);
 	if (res) *res = t->result;
 	if (t->map_base) __munmap(t->map_base, t->map_size);
-	return 0;
+	return 0;  // r = 0，也是exited的意思
 }
 
 int __pthread_join(pthread_t t, void **res)

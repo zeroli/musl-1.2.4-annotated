@@ -1,7 +1,9 @@
 {
     "files.associations": {
         "*.cu": "cpp",
-        "reloc.h": "c"
+        "reloc.h": "c",
+        "*.in": "cpp",
+        "pthread_impl.h": "c"
     },
     "C_Cpp.default.compilerPath": "c:\\Users\\zeli\\Apps\\msys64\\mingw64\\bin\\gcc.exe"
 }

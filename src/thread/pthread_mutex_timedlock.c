@@ -62,14 +62,17 @@ int __pthread_mutex_timedlock(pthread_mutex_t *restrict m, const struct timespec
 	int type = m->_m_type;
 	int r, t, priv = (type & 128) ^ 128;
 
+	// 尝试是否可以lock？
 	r = __pthread_mutex_trylock(m);
 	if (r != EBUSY) return r;
 
 	if (type&8) return pthread_mutex_timedlock_pi(m, at);
-	
+
+	// 也要在用户空间spin下
 	int spins = 100;
 	while (spins-- && m->_m_lock && !m->_m_waiters) a_spin();
 
+	// 不断trylock
 	while ((r=__pthread_mutex_trylock(m)) == EBUSY) {
 		r = m->_m_lock;
 		int own = r & 0x3fffffff;
@@ -82,6 +85,7 @@ int __pthread_mutex_timedlock(pthread_mutex_t *restrict m, const struct timespec
 		a_inc(&m->_m_waiters);
 		t = r | 0x80000000;
 		a_cas(&m->_m_lock, r, t);
+		// 进入内核空间futex wait等待
 		r = __timedwait(&m->_m_lock, t, CLOCK_REALTIME, at, priv);
 		a_dec(&m->_m_waiters);
 		if (r && r != EINTR) break;
