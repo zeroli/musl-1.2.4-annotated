@@ -197,7 +197,7 @@ int posix_spawn(pid_t *restrict res, const char *restrict path,
 
 	if (pid > 0) {
 		if (read(args.p[0], &ec, sizeof ec) != sizeof ec) ec = 0;
-		else waitpid(pid, &(int){0}, 0);
+		else waitpid(pid, &(int){0}, 0);  // `&(int){0}`, C支持这种写法，C++不支持
 	} else {
 		ec = -pid;
 	}

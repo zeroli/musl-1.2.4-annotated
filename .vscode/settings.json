@@ -3,7 +3,8 @@
         "*.cu": "cpp",
         "reloc.h": "c",
         "*.in": "cpp",
-        "pthread_impl.h": "c"
+        "pthread_impl.h": "c",
+        "wait.h": "c"
     },
     "C_Cpp.default.compilerPath": "c:\\Users\\zeli\\Apps\\msys64\\mingw64\\bin\\gcc.exe"
 }

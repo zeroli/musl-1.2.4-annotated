@@ -48,9 +48,13 @@ pid_t wait4 (pid_t, int *, int, struct rusage *);
 #define WEXITSTATUS(s) (((s) & 0xff00) >> 8)
 #define WTERMSIG(s) ((s) & 0x7f)
 #define WSTOPSIG(s) WEXITSTATUS(s)
+// coredump，第7位为1？代表信号trigger了
 #define WCOREDUMP(s) ((s) & 0x80)
+// 信号退出，低7位肯定是非0
 #define WIFEXITED(s) (!WTERMSIG(s))
 #define WIFSTOPPED(s) ((short)((((s)&0xffff)*0x10001U)>>8) > 0x7f00)
+// 如果高8位有值，-1之后肯定要>=0xffu
+// 高8位有值，说明是exit退出
 #define WIFSIGNALED(s) (((s)&0xffff)-1U < 0xffu)
 #define WIFCONTINUED(s) ((s) == 0xffff)
 
